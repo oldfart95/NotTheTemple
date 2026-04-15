@@ -10,6 +10,9 @@ const urlSchema = z.string().url();
 export const assetTypeSchema = z.enum(['stock', 'etf', 'index', 'crypto', 'forex', 'option', 'future']);
 export type AssetType = z.infer<typeof assetTypeSchema>;
 
+export const barIntervalSchema = z.enum(['1m', '5m', '15m', '1h', '1d']);
+export type BarInterval = z.infer<typeof barIntervalSchema>;
+
 /**
  * Canonical exchange/venue metadata referenced by symbols and market status.
  */
@@ -126,7 +129,7 @@ export type Trade = z.infer<typeof tradeSchema>;
 export const barSchema = z
   .object({
     symbol: symbolSchema,
-    interval: z.enum(['1m', '5m', '15m', '1h', '1d']),
+    interval: barIntervalSchema,
     open: z.number(),
     high: z.number(),
     low: z.number(),

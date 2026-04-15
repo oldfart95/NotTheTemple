@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsup src/index.ts --format esm --target node22 --clean",
     "start": "node dist/index.js",
+    "seed": "tsx src/seed.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src"
   },
@@ -15,6 +16,8 @@
     "@market-tracker/config": "workspace:*",
     "@market-tracker/contracts": "workspace:*",
     "@market-tracker/ingest-provider-template": "workspace:*",
-    "fastify": "^5.2.1"
+    "fastify": "^5.2.1",
+    "pg": "^8.14.1",
+    "zod": "^3.24.2"
   }
 }
