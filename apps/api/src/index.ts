@@ -1,8 +1,13 @@
 import cors from '@fastify/cors';
 import Fastify from 'fastify';
 import { ports, serviceNames } from '@market-tracker/config';
-import type { HealthResponse, QuoteSnapshotResponse } from '@market-tracker/contracts';
-import { DEFAULT_WATCHLIST } from '@market-tracker/contracts';
+import {
+  DEFAULT_WATCHLIST,
+  healthResponseSchema,
+  quoteSnapshotResponseSchema,
+  type HealthResponse,
+  type QuoteSnapshotResponse
+} from '@market-tracker/contracts';
 import { MockProviderAdapter } from '@market-tracker/ingest-provider-template';
 
 const app = Fastify({
@@ -16,20 +21,22 @@ await app.register(cors, {
 const provider = new MockProviderAdapter();
 
 app.get('/health', async (): Promise<HealthResponse> => {
-  return {
+  return healthResponseSchema.parse({
     service: serviceNames.api,
     status: 'ok',
     timestamp: new Date().toISOString()
-  };
+  });
 });
 
 app.get('/quotes/snapshot', async (): Promise<QuoteSnapshotResponse> => {
   const data = await provider.fetchSnapshot([...DEFAULT_WATCHLIST]);
+  const providerHealth = await provider.getHealth?.();
 
-  return {
+  return quoteSnapshotResponseSchema.parse({
     data,
-    generatedAt: new Date().toISOString()
-  };
+    generatedAt: new Date().toISOString(),
+    providerHealth
+  });
 });
 
 const host = process.env.API_HOST ?? '0.0.0.0';

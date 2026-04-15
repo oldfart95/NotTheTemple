@@ -56,9 +56,9 @@ export default function HomePage() {
       >
         <h2 style={{ marginTop: 0 }}>Default Watchlist</h2>
         <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#cbd5e1' }}>
-          {DEFAULT_WATCHLIST.map(({ provider, symbol }) => (
-            <li key={symbol}>
-              {symbol} via {provider}
+          {DEFAULT_WATCHLIST.map((instrument) => (
+            <li key={instrument.id}>
+              {instrument.ticker} ({instrument.assetType}) via {instrument.exchange.mic} / {instrument.providerId}
             </li>
           ))}
         </ul>

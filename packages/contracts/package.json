@@ -12,5 +12,8 @@
     "build": "tsup src/index.ts --dts --format esm --clean",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
   }
 }
