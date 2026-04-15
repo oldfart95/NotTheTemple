@@ -63,8 +63,15 @@ export const removeSymbolFromWatchlist = async (watchlistId: string, symbol: str
 };
 
 export const searchSymbols = async (query: string): Promise<Symbol[]> => {
-  const payload = await request<{ data: Symbol[] }>(`/symbols/search?q=${encodeURIComponent(query)}`);
-  return payload.data;
+  try {
+    const payload = await request<{ data: Symbol[] }>(`/symbols/search?q=${encodeURIComponent(query)}`);
+    return payload.data;
+  } catch {
+    const normalized = query.trim().toUpperCase();
+    return fallbackSymbols.filter(
+      (symbol) => symbol.ticker.includes(normalized) || symbol.displayName.toUpperCase().includes(normalized)
+    );
+  }
 };
 
 export const fetchProfile = async (symbol: string): Promise<CompanyProfile> =>

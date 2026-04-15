@@ -1,7 +1,17 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Bar, GatewayServerMessage, MarketStatus, ProviderHealth, Quote, Trade } from '@market-tracker/contracts';
+import {
+  DEFAULT_WATCHLIST,
+  sampleMarketStatus,
+  sampleProviderMetadata,
+  type Bar,
+  type GatewayServerMessage,
+  type MarketStatus,
+  type ProviderHealth,
+  type Quote,
+  type Trade
+} from '@market-tracker/contracts';
 
 export type StreamState = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -25,6 +35,7 @@ export type StreamSnapshot = {
 };
 
 const streamUrl = process.env.NEXT_PUBLIC_STREAM_URL ?? 'ws://localhost:4010/ws';
+const symbolCatalog = new Map(DEFAULT_WATCHLIST.map((symbol) => [symbol.ticker, symbol]));
 
 const appendEvent = (events: StreamDebugEvent[], label: string): StreamDebugEvent[] =>
   [
@@ -53,6 +64,85 @@ export function useMarketStream(symbols: string[]): StreamSnapshot {
 
   useEffect(() => {
     const activeSymbols = symbolKey ? symbolKey.split('|') : [];
+    const shouldUseBrowserMock = streamUrl === 'mock';
+
+    if (shouldUseBrowserMock) {
+      setStatus('connected');
+      setError(undefined);
+      setEvents((current) => appendEvent(current, `Started browser mock stream for ${activeSymbols.join(', ')}`));
+
+      const interval = setInterval(() => {
+        const receivedAt = new Date().toISOString();
+        setLastMessageAt(receivedAt);
+        setMarketStatus({
+          ...sampleMarketStatus,
+          asOf: receivedAt,
+          reason: 'Static Pages browser mock stream is active.'
+        });
+
+        for (const [index, ticker] of activeSymbols.entries()) {
+          const symbol = symbolCatalog.get(ticker);
+          if (!symbol) {
+            continue;
+          }
+
+          const seed = Date.now() / 850 + index * 3;
+          const base = ticker === 'MSFT' ? 425 : 189;
+          const price = Number((base + Math.sin(seed) * 1.8 + Math.cos(seed / 2) * 0.7).toFixed(2));
+          const previousClose = base - 0.65;
+          const change = Number((price - previousClose).toFixed(2));
+          const changePercent = Number(((change / previousClose) * 100).toFixed(2));
+          const provider = {
+            ...sampleProviderMetadata,
+            providerId: 'browser-mock',
+            providerName: 'Browser Mock Stream',
+            dataset: 'github-pages-demo',
+            realtime: true,
+            delayedBySeconds: 0
+          };
+          const quote: Quote = {
+            symbol,
+            marketStatus: sampleMarketStatus,
+            price,
+            currency: symbol.quoteCurrency ?? symbol.baseCurrency,
+            change,
+            changePercent,
+            previousClose,
+            open: Number((price - 0.3).toFixed(2)),
+            high: Number((price + 0.9).toFixed(2)),
+            low: Number((price - 1.1).toFixed(2)),
+            dayVolume: 1_200_000 + Math.round(Math.abs(Math.sin(seed)) * 450_000),
+            bid: Number((price - 0.01).toFixed(2)),
+            ask: Number((price + 0.01).toFixed(2)),
+            bidSize: 100 + index,
+            askSize: 120 + index,
+            sourceTime: receivedAt,
+            ingestTime: receivedAt,
+            provider
+          };
+          const bar: Bar = {
+            symbol,
+            interval: '1m',
+            open: Number((price - 0.28).toFixed(2)),
+            high: Number((price + 0.42).toFixed(2)),
+            low: Number((price - 0.5).toFixed(2)),
+            close: price,
+            volume: 5_000 + Math.round(Math.abs(Math.cos(seed)) * 1_000),
+            startTime: new Date(Date.now() - 60_000).toISOString(),
+            endTime: receivedAt,
+            sourceTime: receivedAt,
+            ingestTime: receivedAt,
+            provider
+          };
+
+          setQuotes((current) => ({ ...current, [ticker]: quote }));
+          setBars((current) => ({ ...current, [ticker]: [...(current[ticker] ?? []), bar].slice(-80) }));
+        }
+      }, 1_000);
+
+      return () => clearInterval(interval);
+    }
+
     const socket = new WebSocket(streamUrl);
     socketRef.current = socket;
 
