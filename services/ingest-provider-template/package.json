@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --dts --format esm --clean",
+    "mock:harness": "tsx src/harness.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src"
   },
