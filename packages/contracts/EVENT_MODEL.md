@@ -42,6 +42,7 @@ stable payload shape.
 - `quote.updated`: latest normalized quote snapshot for a symbol
 - `trade.printed`: last-sale trade update
 - `bar.closed`: OHLCV interval close
+- `market.status`: normalized venue/session status update
 - `news.published`: normalized news item
 - `provider.health`: upstream provider status change or health pulse
 - `system.heartbeat`: lightweight stream liveness signal

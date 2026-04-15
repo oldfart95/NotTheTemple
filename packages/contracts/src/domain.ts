@@ -269,6 +269,12 @@ export const streamEventSchema = z.discriminatedUnion('type', [
     payload: barSchema
   }),
   z.object({
+    type: z.literal('market.status'),
+    eventId: z.string().min(1),
+    emittedAt: timestampSchema,
+    payload: marketStatusSchema
+  }),
+  z.object({
     type: z.literal('news.published'),
     eventId: z.string().min(1),
     emittedAt: timestampSchema,
@@ -292,6 +298,51 @@ export const streamEventSchema = z.discriminatedUnion('type', [
 ]);
 export type StreamEvent = z.infer<typeof streamEventSchema>;
 
+export const gatewayClientMessageSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('subscribe'),
+    symbols: z.array(z.string().min(1)).default([])
+  }),
+  z.object({
+    type: z.literal('unsubscribe'),
+    symbols: z.array(z.string().min(1)).default([])
+  }),
+  z.object({
+    type: z.literal('ping'),
+    timestamp: timestampSchema.optional()
+  })
+]);
+export type GatewayClientMessage = z.infer<typeof gatewayClientMessageSchema>;
+
+export const gatewayServerMessageSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('welcome'),
+    clientId: z.string().min(1),
+    connectedAt: timestampSchema
+  }),
+  z.object({
+    type: z.literal('subscriptions.updated'),
+    symbols: z.array(z.string().min(1))
+  }),
+  z.object({
+    type: z.literal('stream.event'),
+    event: streamEventSchema
+  }),
+  z.object({
+    type: z.literal('heartbeat'),
+    timestamp: timestampSchema
+  }),
+  z.object({
+    type: z.literal('pong'),
+    timestamp: timestampSchema
+  }),
+  z.object({
+    type: z.literal('error'),
+    message: z.string().min(1)
+  })
+]);
+export type GatewayServerMessage = z.infer<typeof gatewayServerMessageSchema>;
+
 export const parseQuote = (input: unknown): Quote => quoteSchema.parse(input);
 export const parseTrade = (input: unknown): Trade => tradeSchema.parse(input);
 export const parseBar = (input: unknown): Bar => barSchema.parse(input);
@@ -304,3 +355,5 @@ export const parseWatchlist = (input: unknown): Watchlist => watchlistSchema.par
 export const parseAlertRule = (input: unknown): AlertRule => alertRuleSchema.parse(input);
 export const parseProviderHealth = (input: unknown): ProviderHealth => providerHealthSchema.parse(input);
 export const parseStreamEvent = (input: unknown): StreamEvent => streamEventSchema.parse(input);
+export const parseGatewayClientMessage = (input: unknown): GatewayClientMessage => gatewayClientMessageSchema.parse(input);
+export const parseGatewayServerMessage = (input: unknown): GatewayServerMessage => gatewayServerMessageSchema.parse(input);
