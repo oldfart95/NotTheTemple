@@ -1,0 +1,20 @@
+{
+  "name": "@market-tracker/stream",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --target node22 --clean",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@fastify/websocket": "^11.0.2",
+    "@market-tracker/config": "workspace:*",
+    "@market-tracker/contracts": "workspace:*",
+    "fastify": "^5.2.1"
+  }
+}

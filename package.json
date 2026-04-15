@@ -1,0 +1,31 @@
+{
+  "name": "market-tracker-platform",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.8.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "corepack pnpm -r --parallel --filter @market-tracker/web --filter @market-tracker/api --filter @market-tracker/stream dev",
+    "build": "corepack pnpm -r --if-present build",
+    "typecheck": "corepack pnpm -r --if-present typecheck",
+    "lint": "corepack pnpm -r --if-present lint",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "docker:up": "docker compose -f deploy/docker/docker-compose.yml up --build",
+    "docker:down": "docker compose -f deploy/docker/docker-compose.yml down",
+    "docker:infra": "docker compose -f deploy/docker/docker-compose.yml up -d postgres redis"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^22.14.1",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.1"
+  }
+}

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+.pnpm-store
+.corepack
+
+# Build output
+dist
+.turbo
+.next
+coverage
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode
+
+# Docker
+postgres-data
+redis-data

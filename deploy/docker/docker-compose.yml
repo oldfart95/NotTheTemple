@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: market-tracker-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-market_tracker}
+      POSTGRES_USER: ${POSTGRES_USER:-market_tracker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-market_tracker}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: market-tracker-redis
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.api
+    container_name: market-tracker-api
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+    ports:
+      - '${API_PORT:-4000}:4000'
+    depends_on:
+      - postgres
+      - redis
+
+  stream:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.stream
+    container_name: market-tracker-stream
+    environment:
+      STREAM_HOST: 0.0.0.0
+      STREAM_PORT: 4010
+    ports:
+      - '${STREAM_PORT:-4010}:4010'
+    depends_on:
+      - redis
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.web
+    container_name: market-tracker-web
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
+      NEXT_PUBLIC_STREAM_URL: ws://localhost:4010/ws
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    depends_on:
+      - api
+      - stream
+
+volumes:
+  postgres-data:
